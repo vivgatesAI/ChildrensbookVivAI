@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Your Story is Ready!</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#6af425",
+            "background-light": "#f6f8f5",
+            "background-dark": "#162210",
+          },
+          fontFamily: {
+            "display": ["Plus Jakarta Sans", "Noto Sans", "sans-serif"]
+          },
+          borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body>
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden font-display">
+<!-- TopAppBar -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between">
+<div class="flex size-12 shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-black dark:text-white">arrow_back</span>
+</div>
+<h2 class="text-black dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Hooray!</h2>
+</div>
+<!-- HeadlineText -->
+<h1 class="text-black dark:text-white tracking-light text-[32px] font-bold leading-tight px-4 text-center pb-3 pt-6">Your Story is Ready!</h1>
+<!-- Images -->
+<div class="flex w-full grow bg-background-light dark:bg-background-dark p-4">
+<div class="w-full gap-1 overflow-hidden bg-background-light dark:bg-background-dark @[480px]:gap-2 aspect-[3/4] rounded-xl flex shadow-lg">
+<div class="w-full bg-center bg-no-repeat bg-cover aspect-auto rounded-xl flex-1" data-alt="A whimsical illustrated cover of a children's book featuring colorful characters and a playful landscape." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDsB-ejITNv-jtLFjMQrmH7UT5SuijpBfI5uy13PskJLN3xQDShp3SSPQ0bWZ1QZZfz9OqqqUU8uLeWQlYJJlEPSzzwmFaw6QU462adFupv1TjWlKcTJjj3O1OtywEfvpFaQkHp_BUW_u-LtzYZQLpAQlLqselVFySxLFyNramcpe0qmVjxIw9WOkBtUQaQgZmR067bYi1j6NsApoUSuMd_WhKKhhcoIBh25by9Z4BgMwiDLx44JtZuVleEduPtuHjjmQvNnwBmrw");'></div>
+</div>
+</div>
+<!-- BodyText -->
+<p class="text-black/70 dark:text-white/70 text-base font-normal leading-normal pb-3 pt-1 px-4 text-center">Save or Share Your Adventure</p>
+<!-- ButtonGroup -->
+<div class="flex justify-center w-full">
+<div class="flex flex-1 gap-3 max-w-[480px] flex-col items-stretch px-4 py-3">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 px-5 bg-primary text-black text-base font-bold leading-normal tracking-[0.015em] w-full gap-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+<span class="truncate">Download PDF</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 px-5 bg-primary/20 text-black dark:bg-white/20 dark:text-white text-base font-bold leading-normal tracking-[0.015em] w-full gap-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined">code</span>
+<span class="truncate">Download Web Version</span>
+</button>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 px-5 bg-primary/20 text-black dark:bg-white/20 dark:text-white text-base font-bold leading-normal tracking-[0.015em] w-full gap-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined">share</span>
+<span class="truncate">Share with Family</span>
+</button>
+</div>
+</div>
+<div class="h-5 bg-background-light dark:bg-background-dark"></div>
+</div>
+</body></html>

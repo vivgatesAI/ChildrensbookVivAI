@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Bookshelf</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#6af425",
+              "background-light": "#f6f8f5",
+              "background-dark": "#162210",
+            },
+            fontFamily: {
+              "display": ["Plus Jakarta Sans", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+<!-- Top App Bar -->
+<div class="flex flex-col gap-2 p-4 pb-2 bg-background-light dark:bg-background-dark">
+<div class="flex items-center h-12 justify-between">
+<button class="text-slate-800 dark:text-slate-200 flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+</div>
+<p class="text-slate-900 dark:text-white tracking-light text-[28px] font-bold leading-tight">My Bookshelf</p>
+</div>
+<!-- Search Bar -->
+<div class="px-4 py-3">
+<label class="flex flex-col min-w-40 h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-full h-full">
+<div class="text-slate-500 dark:text-slate-400 flex border-none bg-primary/20 items-center justify-center pl-4 rounded-l-full border-r-0">
+<span class="material-symbols-outlined text-2xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-primary/20 focus:border-none h-full placeholder:text-slate-500 dark:placeholder:text-slate-400 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search for a story..." value=""/>
+</div>
+</label>
+</div>
+<!-- Chips for Filtering -->
+<div class="flex gap-3 p-3 overflow-x-auto">
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary pl-3 pr-4">
+<span class="material-symbols-outlined text-xl text-slate-900">bookmarks</span>
+<p class="text-slate-900 text-sm font-medium leading-normal">All Books</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/20 pl-3 pr-4">
+<span class="material-symbols-outlined text-xl text-slate-800 dark:text-slate-200">star</span>
+<p class="text-slate-800 dark:text-slate-200 text-sm font-medium leading-normal">Favorites</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/20 pl-3 pr-4">
+<span class="material-symbols-outlined text-xl text-slate-800 dark:text-slate-200">spark</span>
+<p class="text-slate-800 dark:text-slate-200 text-sm font-medium leading-normal">Newest</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/20 pl-3 pr-4">
+<span class="material-symbols-outlined text-xl text-slate-800 dark:text-slate-200">schedule</span>
+<p class="text-slate-800 dark:text-slate-200 text-sm font-medium leading-normal">Recent</p>
+</div>
+</div>
+<!-- Image Grid of Books -->
+<div class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-4 p-4">
+<div class="relative bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-[3/4]" data-alt="Book cover for The Magical Treehouse" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCbRbCm7SHNOpTRr1s03fuiluPhR3V7vs1esTWcZQr6RODIGiUGPoM8MPRU5h7ODE30p-QwqZRAZ43uGdPQeRWnXtefKggT1_ARhW3WRdfb-TXHas_qCe7X2GJokHiuaX0gpaAckXJGSW__qkPUheJNsBScqpkSZFSsjJ2qzXXnn8-iOYhWlnKSxKWEgus9CRN0c8etPqOBfSBPueBw0OyOyFD0wOfd3TclkDKoScCh8PKZWAkWfdsALWeXERheVeZcKoJUYeCDDg");'>
+<p class="text-white text-base font-bold leading-tight line-clamp-3">The Magical Treehouse</p>
+<div class="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+<span class="material-symbols-outlined text-lg text-amber-300" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="relative bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-[3/4]" data-alt="Book cover for Adventures of Captain Paw" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDUty6XtyJ2Z9GlsoOLBOWk6hB-iYVvefXTfJBbEizw3x7yfwFzAOhclbto2rnsYnEwVRT6hpJEth7fWuc4uRhjP225AgtHjfKGSoLTvGm0-LPZxEdgRjCefTggj6oVsaKtHuKJUv5JCUskuWm-RFL6pMvAJCGXkHiyMXgjMyt3EqGzsoTd0cV_nXr-rdcCkc3-q67zYgzBztkT41965aNFBpt0yMkkBWR7KBk82FP2zCpGsSyE_ZXHdKNICgT4QlIbmo6VXV4wZQ");'>
+<p class="text-white text-base font-bold leading-tight line-clamp-3">Adventures of Captain Paw</p>
+</div>
+<div class="relative bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-[3/4]" data-alt="Book cover for The Girl Who Could Fly" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuD5Ygjh58GJEocxms_Rr1RH0pKk1-A4sv8zL_dfoQCjJS4aBQI5WJ-Z8Sc3pHBC7gmoh5hBWgx75H4sLFkx-GC-I6ffQiwGs-u4Lc1GZcXiE_ePnWwaSbx_TgbJFr7V5HeGie0ONQhqYAXXIubF85yyBlWhVDOK_tzWQYrRIKWgmw0nUiZuL7qiYNegKo8G5ZpHDsNcDau0X7JFtfGK9B5XaGQdIYyi1LJthOEDT81WX07fhZF1y1gUlclqIuPC9C69ZsdqgpFUrQ");'>
+<p class="text-white text-base font-bold leading-tight line-clamp-3">The Girl Who Could Fly</p>
+</div>
+<div class="relative bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-[3/4]" data-alt="Book cover for Mystery of the Missing Toy" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBp7lJtHI9C7vlXW5OIuNUnPPKbUCrDHp5zRSjQBk_LJF0v_-tdGWCh2wnJrEZ0KhzefS0CqVCMGGIMQIUAh3ml_LMOWRxk9k9qKs0tl93fjGw_QozX6nyshq8a0mElOf6hhurnJDmR-6N6R2EoOhPZ90NHBcim0bfqlSOo08ETXgqCkNVX9WFhg02XVQDCNWfqvCztmsc78-wPJhVHA7nBbO8L1UKdBOsYdINtna6fBPnqxRD4Ak6q2DDZoCbDSkXQEJCLRlVwIw");'>
+<p class="text-white text-base font-bold leading-tight line-clamp-3">Mystery of the Missing Toy</p>
+</div>
+<div class="relative bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-[3/4]" data-alt="Book cover for A Dragon's First Roar" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAca6tHDZxq9XWzGiiorwADPvnTA2WXt8LKnGGDXbV47HSuYCSHPN-xrGSw6m_G1Pw4vhVKQfgJMWfC48bBwIIyAQEKkZUQ1qRPnh0CBqGpwbnuoa69GEsMGJl8XZU7WQXZmH_G81zV50pXS2xMvaG1Wi1yn_VE6jY1Om__kBy4S7fQfb21HyMO_EJli0fFZU6k8Huu1fzYR7oogl8bV-tddhtIBbNDeZy0aJku7pQe05FUIH0-TKXhH3e4RcWUfB9UraKiQlzakw");'>
+<p class="text-white text-base font-bold leading-tight line-clamp-3">A Dragon's First Roar</p>
+<div class="absolute top-2 right-2 flex size-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+<span class="material-symbols-outlined text-lg text-amber-300" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="relative bg-cover bg-center flex flex-col gap-3 rounded-xl justify-end p-4 aspect-[3/4]" data-alt="Book cover for The Sleepy Little Bear" style='background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuBCmyFjdOnSPEIBDsVHUSX1faA97j3QqnYYVZ7kz5ExDocFeRlG1p3vGuxtBZEoJQuWiTMnhuo7lqeYTQP0rqfvtBKpC7zix3Q95-ZN8kBWclXaHLUSDlJDhj6G1FB0bAaY-zECYppWmb2HIbVy2VuyslHjs9MN8VMYno0niZ0FBuAH6FzM4wdh1ULl6nYcvYgTUSubCS0vkj7l0PzjxzQ2JRoFde6HN-MOxcyDJ5rKgFu-t2mpWAroJaisV3EKI5-PtkLb2qzVYg");'>
+<p class="text-white text-base font-bold leading-tight line-clamp-3">The Sleepy Little Bear</p>
+</div>
+</div>
+<!-- Floating Action Button -->
+<div class="sticky bottom-0 right-0 w-full p-4 flex justify-end pointer-events-none">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-14 px-5 bg-primary text-slate-900 text-base font-bold leading-normal tracking-[0.015em] min-w-0 gap-3 pl-4 pr-5 shadow-lg pointer-events-auto">
+<span class="material-symbols-outlined text-2xl">add</span>
+<span class="truncate">Create Story</span>
+</button>
+</div>
+</div>
+</body></html>

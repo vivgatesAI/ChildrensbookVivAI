@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Create Your Story</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#6af425",
+              "background-light": "#f6f8f5",
+              "background-dark": "#162210",
+              "sunny-yellow": "#FFD966",
+              "coral": "#FF8C69",
+              "dark-navy": "#1A237E",
+              "soft-cream": "#FAF3E0",
+              "sky-blue": "#E3F2FD",
+            },
+            fontFamily: {
+              "display": ["Plus Jakarta Sans", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-soft-cream dark:bg-dark-navy">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-soft-cream dark:bg-dark-navy group/design-root overflow-x-hidden">
+<!-- TopAppBar -->
+<div class="flex items-center p-4 pb-2 justify-between">
+<button class="text-dark-navy dark:text-soft-cream flex size-12 shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-3xl">menu</span>
+</button>
+<h2 class="text-dark-navy dark:text-soft-cream text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Create Your Story</h2>
+</div>
+<main class="flex flex-col items-center justify-center grow px-4 text-center">
+<!-- Hero Illustration -->
+<div class="w-full max-w-sm mx-auto">
+<div class="w-full bg-center bg-no-repeat bg-contain aspect-square" data-alt="A whimsical illustration of a friendly dragon reading a book on a cloud" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBgxAGWRCcBULUnJqgvIcpUDARPA6HA7Jb_Z7cn000bl7LhpJaR1tBxt1fQWawCmnHktpfoYxghCRPlScKpEASscjupGf2qyw7977OD8DfGtKx4x951NC9lcOP1NJCRH1Kz7bUfFD8DM83wqgdp1p6tZysZVzVx53nHdI90YRbv93DH-Zzw-M49l3Rj47z3GYwx5qB3I42dznDYBXX8tH4b_B4ki_jLaygEa7ila4gWFMlbAa-5pbPnIlpel_16bbI0MQJ7LNRHxw");'></div>
+</div>
+<!-- HeadlineText -->
+<h1 class="text-dark-navy dark:text-soft-cream tracking-light text-[32px] font-bold leading-tight pt-6 pb-3">Dream Up a Story</h1>
+<!-- TextField -->
+<div class="flex w-full max-w-lg flex-wrap items-end gap-4 py-3">
+<label class="flex flex-col min-w-40 flex-1">
+<p class="text-dark-navy/80 dark:text-soft-cream/80 text-base font-medium leading-normal pb-2 sr-only">Your story idea</p>
+<textarea class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-dark-navy dark:text-dark-navy focus:outline-0 focus:ring-2 focus:ring-coral border-2 border-dark-navy/20 dark:border-soft-cream/40 bg-white/70 dark:bg-soft-cream/90 focus:border-coral min-h-36 placeholder:text-dark-navy/50 dark:placeholder:text-dark-navy/60 p-[15px] text-base font-normal leading-normal shadow-md" placeholder="A brave knight who is afraid of spiders, or a magical treehouse that travels through time..."></textarea>
+</label>
+</div>
+<!-- MetaText -->
+<button class="text-dark-navy/90 dark:text-soft-cream/90 text-sm font-medium leading-normal pb-3 pt-1 underline">Need an idea?</button>
+<!-- Primary CTA Button -->
+<div class="w-full max-w-lg px-4 pt-6 pb-12">
+<button class="inline-flex w-full items-center justify-center whitespace-nowrap rounded-full px-8 py-4 text-base font-bold leading-6 text-dark-navy shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95" style="background-color: #FFD966;">Generate My Book!</button>
+</div>
+</main>
+</div>
+</body></html>
