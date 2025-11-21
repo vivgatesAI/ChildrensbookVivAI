@@ -112,10 +112,10 @@ Format the response as JSON with this structure:
     generateBookImages(bookId, storyData.pages, illustrationStyle).catch(
       (error) => {
         console.error('Error generating images:', error)
-        const book = books.get(bookId)
+        const book = getBook(bookId)
         if (book) {
           book.status = 'error'
-          books.set(bookId, book)
+          setBook(bookId, book)
         }
       }
     )
@@ -196,7 +196,4 @@ async function generateBookImages(
     throw error
   }
 }
-
-// Export books map for use in other routes
-export { books }
 
