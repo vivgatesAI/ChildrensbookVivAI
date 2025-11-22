@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { Icon } from '@/components/Icons'
 
 interface BookPage {
   text: string
@@ -319,7 +320,7 @@ export default function BookViewerPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
         <div className="text-center">
-          <span className="material-symbols-outlined text-6xl text-purple-500 animate-spin mb-4">auto_awesome</span>
+          <Icon name="auto_awesome" className="text-purple-500 animate-spin mb-4" size={64} />
           <p className="text-lg font-semibold text-gray-800">Loading book...</p>
         </div>
       </div>
@@ -372,7 +373,7 @@ export default function BookViewerPage() {
           onClick={() => router.back()}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
         >
-          <span className="material-symbols-outlined text-gray-700 dark:text-gray-300">arrow_back</span>
+          <Icon name="arrow_back" className="text-gray-700 dark:text-gray-300" size={24} />
         </button>
         <h2 className="flex-1 text-center text-lg font-bold text-gray-800 dark:text-gray-100 truncate px-4">
           {book.title}
@@ -383,7 +384,7 @@ export default function BookViewerPage() {
             className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 hover:bg-green-600 text-white transition-all shadow-md hover:scale-110 active:scale-95"
             title="Download as HTML"
           >
-            <span className="material-symbols-outlined text-lg">download</span>
+            <Icon name="download" className="text-lg" size={24} />
           </button>
           {book.audioUrl ? (
             <audio controls className="h-8 w-24 rounded-lg">
@@ -396,9 +397,11 @@ export default function BookViewerPage() {
               className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:scale-110 active:scale-95"
               title="Generate Audio"
             >
-              <span className="material-symbols-outlined text-lg animate-spin">
-                {isGeneratingAudio ? 'hourglass_empty' : 'volume_up'}
-              </span>
+              <Icon 
+                name={isGeneratingAudio ? 'hourglass_empty' : 'volume_up'} 
+                className="text-lg animate-spin" 
+                size={24} 
+              />
             </button>
           )}
         </div>
@@ -419,7 +422,7 @@ export default function BookViewerPage() {
             />
           ) : (
             <div className="w-full h-64 bg-gradient-to-br from-purple-200 to-pink-200 dark:from-purple-800 dark:to-pink-800 flex items-center justify-center">
-              <span className="material-symbols-outlined text-6xl text-white/50 animate-pulse">image</span>
+              <Icon name="image" className="text-white/50 animate-pulse" size={64} />
             </div>
           )}
         </div>
@@ -458,7 +461,7 @@ export default function BookViewerPage() {
             disabled={currentPage === 0}
             className="flex h-12 items-center justify-center gap-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 px-6 text-base font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
           >
-            <span className="material-symbols-outlined">chevron_left</span>
+            <Icon name="chevron_left" size={24} />
             <span>Previous</span>
           </button>
           <button
@@ -467,7 +470,7 @@ export default function BookViewerPage() {
             className="flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 dark:from-blue-600 dark:hover:bg-blue-700 px-6 text-base font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
           >
             <span>Next</span>
-            <span className="material-symbols-outlined">chevron_right</span>
+            <Icon name="chevron_right" size={24} />
           </button>
         </div>
       </div>

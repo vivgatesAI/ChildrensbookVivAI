@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { Icon } from '@/components/Icons'
 
 export default function WelcomePage() {
   const router = useRouter()
@@ -19,9 +20,7 @@ export default function WelcomePage() {
         <div className="flex flex-grow flex-col items-center justify-center">
           <div className="mb-6 animate-pulse">
             <div className="rounded-full bg-white/30 backdrop-blur-md p-8 shadow-2xl border-4 border-white/40">
-              <span className="material-symbols-outlined text-8xl text-white drop-shadow-2xl">
-                auto_stories
-              </span>
+              <Icon name="auto_stories" className="text-white drop-shadow-2xl" size={96} />
             </div>
           </div>
           <h1 className="px-4 pb-4 text-center font-display text-5xl font-bold text-white drop-shadow-lg">
@@ -36,9 +35,9 @@ export default function WelcomePage() {
             onClick={() => router.push('/generate')}
             className="w-full rounded-2xl bg-yellow-400 hover:bg-yellow-300 px-8 py-4 font-display text-lg font-bold text-purple-700 shadow-2xl transition-all hover:scale-105 hover:shadow-3xl active:scale-95 flex items-center justify-center gap-2"
           >
-            <span className="material-symbols-outlined text-2xl">auto_stories</span>
+            <Icon name="auto_stories" className="text-purple-700" size={24} />
             <span>Start Your Story</span>
-            <span className="material-symbols-outlined text-2xl">auto_stories</span>
+            <Icon name="auto_stories" className="text-purple-700" size={24} />
           </button>
           <p className="mt-4 cursor-pointer text-center font-display text-sm font-medium text-white/80 underline hover:text-white transition-colors">
             How does it work?

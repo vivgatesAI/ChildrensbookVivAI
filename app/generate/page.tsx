@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { Icon } from '@/components/Icons'
 
 const AGE_RANGES = [
   { value: 'kindergarten', label: 'Kindergarten' },
@@ -115,7 +116,7 @@ export default function GeneratePage() {
           onClick={() => router.back()}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
         >
-          <span className="material-symbols-outlined text-gray-700 dark:text-gray-300">arrow_back</span>
+          <Icon name="arrow_back" className="text-gray-700 dark:text-gray-300" size={24} />
         </button>
         <h2 className="flex-1 text-center text-lg font-bold text-gray-800 dark:text-gray-100">
           Create Your Story
@@ -129,7 +130,7 @@ export default function GeneratePage() {
           <div className="flex flex-col items-center justify-between w-full h-full">
             <div className="mt-12 w-full max-w-md text-center sm:mt-16">
               <h2 className="font-display text-4xl font-bold text-gray-800 dark:text-gray-100 sm:text-5xl mb-2 flex items-center justify-center gap-2">
-                <span className="material-symbols-outlined text-5xl text-yellow-400 animate-spin">auto_awesome</span>
+                <Icon name="auto_awesome" className="text-yellow-400 animate-spin" size={48} />
                 <span>Mixing the magic...</span>
               </h2>
               <p className="text-gray-600 dark:text-gray-300 text-lg">Creating your storybook</p>
@@ -145,37 +146,17 @@ export default function GeneratePage() {
               </div>
 
               <div className="absolute bottom-0 left-1/2 h-full w-full -translate-x-1/2">
-                <div className="absolute bottom-[75%] left-[60%] h-16 w-16 -translate-x-1/2 animate-bounce" style={{ animationDelay: '0s' }}>
-                  <span
-                    className="material-symbols-outlined text-5xl text-pink-400 drop-shadow-lg dark:text-pink-500"
-                    style={{ transform: 'rotate(15deg)' }}
-                  >
-                    filter_vintage
-                  </span>
+                <div className="absolute bottom-[75%] left-[60%] h-16 w-16 -translate-x-1/2 animate-bounce" style={{ animationDelay: '0s', transform: 'rotate(15deg)' }}>
+                  <Icon name="filter_vintage" className="text-pink-400 drop-shadow-lg dark:text-pink-500" size={48} />
                 </div>
-                <div className="absolute bottom-[60%] right-[65%] h-12 w-12 animate-pulse" style={{ animationDelay: '0.5s' }}>
-                  <span
-                    className="material-symbols-outlined text-4xl text-purple-400 drop-shadow-lg dark:text-purple-500"
-                    style={{ transform: 'rotate(-25deg)' }}
-                  >
-                    local_florist
-                  </span>
+                <div className="absolute bottom-[60%] right-[65%] h-12 w-12 animate-pulse" style={{ animationDelay: '0.5s', transform: 'rotate(-25deg)' }}>
+                  <Icon name="local_florist" className="text-purple-400 drop-shadow-lg dark:text-purple-500" size={36} />
                 </div>
-                <div className="absolute bottom-[40%] left-[70%] h-14 w-14 -translate-x-1/2 animate-bounce" style={{ animationDelay: '1s' }}>
-                  <span
-                    className="material-symbols-outlined text-5xl text-pink-400 drop-shadow-lg dark:text-pink-500"
-                    style={{ transform: 'rotate(-10deg)' }}
-                  >
-                    filter_vintage
-                  </span>
+                <div className="absolute bottom-[40%] left-[70%] h-14 w-14 -translate-x-1/2 animate-bounce" style={{ animationDelay: '1s', transform: 'rotate(-10deg)' }}>
+                  <Icon name="filter_vintage" className="text-pink-400 drop-shadow-lg dark:text-pink-500" size={48} />
                 </div>
-                <div className="absolute bottom-[25%] right-[75%] h-16 w-16 animate-pulse" style={{ animationDelay: '1.5s' }}>
-                  <span
-                    className="material-symbols-outlined text-4xl text-purple-400 drop-shadow-lg dark:text-purple-500"
-                    style={{ transform: 'rotate(20deg)' }}
-                  >
-                    local_florist
-                  </span>
+                <div className="absolute bottom-[25%] right-[75%] h-16 w-16 animate-pulse" style={{ animationDelay: '1.5s', transform: 'rotate(20deg)' }}>
+                  <Icon name="local_florist" className="text-purple-400 drop-shadow-lg dark:text-purple-500" size={36} />
                 </div>
               </div>
 
@@ -196,7 +177,7 @@ export default function GeneratePage() {
                   <p className="text-base font-semibold text-gray-700 dark:text-gray-200">
                     Stirring up your story...
                   </p>
-                  <span className="material-symbols-outlined animate-spin text-blue-500">sync</span>
+                  <Icon name="sync" className="animate-spin text-blue-500" size={24} />
                 </div>
                 <div className="h-3 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                   <div 
@@ -246,12 +227,12 @@ export default function GeneratePage() {
             >
               {showAdvanced ? (
                 <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-lg">expand_less</span>
+                  <Icon name="expand_less" className="text-lg" size={20} />
                   Hide Advanced Options
                 </span>
               ) : (
                 <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-lg">expand_more</span>
+                  <Icon name="expand_more" className="text-lg" size={20} />
                   Show Advanced Options
                 </span>
               )}
@@ -262,7 +243,7 @@ export default function GeneratePage() {
               <div className="w-full space-y-4 rounded-xl bg-white/90 dark:bg-gray-800/90 p-6 shadow-lg mb-6 backdrop-blur-sm">
                 <div className="flex flex-col gap-2">
                   <label className="text-left text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-lg">child_care</span>
+                    <Icon name="child_care" className="text-lg" size={20} />
                     Age Range
                   </label>
                   <select
@@ -281,7 +262,7 @@ export default function GeneratePage() {
 
                 <div className="flex flex-col gap-2">
                   <label className="text-left text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-lg">palette</span>
+                    <Icon name="palette" className="text-lg" size={20} />
                     Illustration Style
                   </label>
                   <select
@@ -309,14 +290,14 @@ export default function GeneratePage() {
               >
                 {isGenerating ? (
                   <>
-                    <span className="material-symbols-outlined animate-spin">sync</span>
+                    <Icon name="sync" className="animate-spin" size={24} />
                     Generating...
                   </>
                 ) : (
                   <>
-                    <span className="material-symbols-outlined">auto_awesome</span>
+                    <Icon name="auto_awesome" size={24} />
                     Generate My Book!
-                    <span className="material-symbols-outlined">auto_awesome</span>
+                    <Icon name="auto_awesome" size={24} />
                   </>
                 )}
               </button>

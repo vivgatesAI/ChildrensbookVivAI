@@ -24,29 +24,52 @@ export async function POST(request: NextRequest) {
     const bookId = `book_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const complexity = AGE_TO_COMPLEXITY[ageRange] || AGE_TO_COMPLEXITY['2nd']
 
-    // Generate book story structure
-    const storyPrompt = `Create a children's book story based on this idea: "${storyIdea}"
+    // Generate book story structure with expert children's book writing
+    const storyPrompt = `You are an award-winning expert children's book author with decades of experience. Create a magical, engaging children's storybook based on this idea: "${storyIdea}"
 
-Requirements:
+CRITICAL REQUIREMENTS:
 - Age range: ${ageRange} grade (${complexity})
-- The story should be appropriate for this age group
 - Create a story with 6-8 pages
-- Each page should have 2-4 sentences
-- Make it engaging, educational, and fun
-- Include a clear beginning, middle, and end
+- Each page MUST have 6-8 complete, well-crafted sentences (not just 2-4)
+- Write at an expert professional level - this should be publication-quality children's literature
+- Use rich, age-appropriate vocabulary that expands young minds
+- Include vivid sensory details (sights, sounds, feelings, smells when appropriate)
+- Create memorable, well-developed characters with distinct personalities
+- Build emotional connection and wonder in every sentence
+- Include descriptive language that paints pictures with words
+- Make it engaging, educational, emotionally resonant, and genuinely fun
+- Include a clear narrative arc: beginning (setup), middle (adventure/challenge), end (resolution)
+- Each page should flow naturally to the next
+- The story should teach gentle life lessons or values naturally woven into the narrative
+- Use varied sentence structure and rhythm that's pleasing when read aloud
+- Include moments of wonder, discovery, and joy
+- Make the dialogue (if any) natural and age-appropriate
+- Ensure cultural sensitivity and positive representation
+
+CHARACTER CONSISTENCY REQUIREMENTS:
+- Identify the main characters in the story (names, appearance, distinctive features)
+- For image generation: maintain character consistency by describing the SAME characters the same way across all pages
+- Include character descriptions in image prompts to ensure visual consistency
+- Note: Character details must be included in imageDescription but keep total prompt under 1600 characters
 
 Format the response as JSON with this structure:
 {
   "title": "Story Title",
+  "characters": {
+    "main": "Character name and brief description",
+    "others": ["Other character names and descriptions"]
+  },
   "pages": [
     {
       "pageNumber": 1,
-      "text": "Page text here...",
-      "imageDescription": "Detailed description of what should be in the illustration for this page, in ${illustrationStyle} style"
+      "text": "Page text here with 6-8 complete, engaging sentences that tell the story beautifully...",
+      "imageDescription": "Detailed visual description of the illustration including character appearances (maintain consistency), setting, mood, and action. Must be in ${illustrationStyle} style. Keep under 200 characters."
     },
     ...
   ]
-}`
+}
+
+Remember: Each page's text should be 6-8 sentences of expert-quality children's book writing that captivates and delights young readers.`
 
     // Generate story text using Venice API directly
     const completionResponse = await fetch(
@@ -63,12 +86,12 @@ Format the response as JSON with this structure:
             {
               role: 'system',
               content:
-                'You are a creative children\'s book author. Always respond with valid JSON only, no additional text.',
+                'You are an award-winning expert children\'s book author with decades of experience creating magical, engaging stories. You write at a professional publication-quality level. Always respond with valid JSON only, no additional text or explanations.', 
             },
             { role: 'user', content: storyPrompt },
           ],
-          temperature: 0.8,
-          max_completion_tokens: 2000,
+          temperature: 0.9,
+          max_completion_tokens: 4000,
           venice_parameters: {
             include_venice_system_prompt: false,
           },
@@ -118,8 +141,13 @@ Format the response as JSON with this structure:
 
     setBook(bookId, book)
 
-    // Generate images for each page asynchronously
-    generateBookImages(bookId, storyData.pages, illustrationStyle).catch(
+    // Generate images for each page asynchronously with character consistency
+    generateBookImages(
+      bookId, 
+      storyData.pages, 
+      illustrationStyle,
+      storyData.characters
+    ).catch(
       (error) => {
         console.error('Error generating images:', error)
         const book = getBook(bookId)
@@ -143,15 +171,35 @@ Format the response as JSON with this structure:
 async function generateBookImages(
   bookId: string,
   pages: any[],
-  illustrationStyle: string
+  illustrationStyle: string,
+  characters?: { main?: string; others?: string[] }
 ) {
   const book = getBook(bookId)
   if (!book) return
 
+  // Extract character consistency information
+  const characterDescriptions: string[] = []
+  if (characters?.main) {
+    characterDescriptions.push(characters.main)
+  }
+  if (characters?.others && characters.others.length > 0) {
+    characterDescriptions.push(...characters.others.slice(0, 2)) // Limit to keep prompt short
+  }
+  const characterConsistency = characterDescriptions.length > 0 
+    ? `Characters: ${characterDescriptions.join(', ')}. Maintain consistent character appearance throughout. ` 
+    : ''
+
   try {
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
-      const imagePrompt = `${page.imageDescription || page.text}, ${illustrationStyle} style, children's book illustration, colorful, whimsical, high quality`
+      // Build prompt with character consistency, keeping under 1600 characters
+      let imageDescription = page.imageDescription || page.text.substring(0, 150)
+      const basePrompt = `${imageDescription}, ${illustrationStyle} style, children's book illustration, colorful, whimsical, high quality, detailed, charming`
+      
+      // Add character consistency info if we have it
+      const fullPrompt = characterConsistency 
+        ? `${characterConsistency}${basePrompt}`.substring(0, 1500) // Ensure under 1600
+        : basePrompt.substring(0, 1500)
 
       // Generate image using Venice API
       const imageResponse = await fetch(
@@ -164,7 +212,7 @@ async function generateBookImages(
           },
           body: JSON.stringify({
             model: 'qwen-image',
-            prompt: imagePrompt,
+            prompt: fullPrompt,
             width: 1024,
             height: 768,
             format: 'webp',
