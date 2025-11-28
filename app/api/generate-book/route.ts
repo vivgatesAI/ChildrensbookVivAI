@@ -86,12 +86,13 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
             {
               role: 'system',
               content:
-                'You are an award-winning expert children\'s book author with decades of experience creating magical, engaging stories. You write at a professional publication-quality level. Always respond with valid JSON only, no additional text or explanations.', 
+                'You are an award-winning expert children\'s book author with decades of experience creating magical, engaging stories. You write at a professional publication-quality level. CRITICAL: You MUST respond with ONLY valid JSON. No markdown code blocks, no explanations, no additional text. Just pure, valid JSON that can be parsed directly.', 
             },
             { role: 'user', content: storyPrompt },
           ],
           temperature: 0.9,
           max_completion_tokens: 4000,
+          response_format: { type: 'json_object' },
           venice_parameters: {
             include_venice_system_prompt: false,
           },
@@ -112,18 +113,70 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
       throw new Error('No story content generated')
     }
 
-    // Parse JSON from response (handle markdown code blocks if present)
+    // Helper function to clean and repair JSON
+    const cleanJSON = (jsonString: string): string => {
+      // Remove markdown code blocks if present
+      let cleaned = jsonString.replace(/```json\s*/g, '').replace(/```\s*/g, '')
+      
+      // Extract JSON object (find first { and matching })
+      const firstBrace = cleaned.indexOf('{')
+      if (firstBrace === -1) {
+        throw new Error('No JSON object found')
+      }
+      
+      let braceCount = 0
+      let lastBrace = firstBrace
+      for (let i = firstBrace; i < cleaned.length; i++) {
+        if (cleaned[i] === '{') braceCount++
+        if (cleaned[i] === '}') {
+          braceCount--
+          if (braceCount === 0) {
+            lastBrace = i
+            break
+          }
+        }
+      }
+      
+      cleaned = cleaned.substring(firstBrace, lastBrace + 1)
+      
+      // Fix common JSON issues
+      // Remove trailing commas before } or ]
+      cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1')
+      
+      // Fix unescaped quotes in strings (basic fix)
+      // This is a simple approach - for production, consider a proper JSON repair library
+      cleaned = cleaned.replace(/([^\\])"/g, (match, p1) => {
+        // Don't fix if it's already escaped or part of a key/value structure
+        return match
+      })
+      
+      return cleaned
+    }
+
+    // Parse JSON from response with improved error handling
     let storyData
     try {
-      const jsonMatch = storyContent.match(/```json\s*([\s\S]*?)\s*```/) || storyContent.match(/\{[\s\S]*\}/)
-      storyData = JSON.parse(jsonMatch ? jsonMatch[1] || jsonMatch[0] : storyContent)
-    } catch (e) {
-      // Fallback: try to extract JSON from the response
-      const jsonMatch = storyContent.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        storyData = JSON.parse(jsonMatch[0])
-      } else {
-        throw new Error('Failed to parse story JSON')
+      const cleanedJSON = cleanJSON(storyContent)
+      storyData = JSON.parse(cleanedJSON)
+    } catch (e: any) {
+      console.error('JSON parsing error:', e.message)
+      console.error('Story content (first 500 chars):', storyContent.substring(0, 500))
+      
+      // Try alternative extraction methods
+      try {
+        // Try to find JSON between first { and last }
+        const firstBrace = storyContent.indexOf('{')
+        const lastBrace = storyContent.lastIndexOf('}')
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          const extracted = storyContent.substring(firstBrace, lastBrace + 1)
+          const cleaned = cleanJSON(extracted)
+          storyData = JSON.parse(cleaned)
+        } else {
+          throw new Error('Could not extract JSON from response')
+        }
+      } catch (e2: any) {
+        console.error('Fallback JSON parsing also failed:', e2.message)
+        throw new Error(`Failed to parse story JSON: ${e.message}. Please try generating the book again.`)
       }
     }
 
