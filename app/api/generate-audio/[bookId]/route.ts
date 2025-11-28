@@ -6,6 +6,17 @@ export async function POST(
   { params }: { params: { bookId: string } }
 ) {
   try {
+    // Check API key
+    const apiKey = process.env.VENICE_API_KEY || 'lnWNeSg0pA_rQUooNpbfpPDBaj2vJnWol5WqKWrIEF'
+    
+    if (!apiKey) {
+      console.error('VENICE_API_KEY is not set')
+      return NextResponse.json(
+        { error: 'API key not configured' },
+        { status: 500 }
+      )
+    }
+
     const book = getBook(params.bookId)
 
     if (!book) {
@@ -32,17 +43,24 @@ export async function POST(
       )
     }
 
+    // Venice API has a 4096 character limit, so truncate if necessary
+    const textToUse = fullText.length > 4096 
+      ? fullText.substring(0, 4093) + '...' 
+      : fullText
+
+    console.log(`Generating audio for book ${params.bookId}, text length: ${textToUse.length}`)
+
     // Generate audio using Venice API
     const audioResponse = await fetch(
       'https://api.venice.ai/api/v1/audio/speech',
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${process.env.VENICE_API_KEY}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          input: fullText,
+          input: textToUse,
           model: 'tts-kokoro',
           voice: 'af_sky', // Child-friendly voice
           response_format: 'mp3',
@@ -54,12 +72,31 @@ export async function POST(
 
     if (!audioResponse.ok) {
       const errorText = await audioResponse.text()
-      console.error('Audio generation error:', errorText)
-      throw new Error(`Audio generation failed: ${audioResponse.statusText}`)
+      console.error('Audio generation error:', {
+        status: audioResponse.status,
+        statusText: audioResponse.statusText,
+        error: errorText,
+      })
+      return NextResponse.json(
+        { 
+          error: `Audio generation failed: ${audioResponse.statusText}`,
+          details: errorText 
+        },
+        { status: audioResponse.status }
+      )
     }
 
     // Convert audio to base64
     const audioBuffer = await audioResponse.arrayBuffer()
+    
+    if (audioBuffer.byteLength === 0) {
+      console.error('Received empty audio buffer')
+      return NextResponse.json(
+        { error: 'Received empty audio response' },
+        { status: 500 }
+      )
+    }
+
     const audioBase64 = Buffer.from(audioBuffer).toString('base64')
     const audioUrl = `data:audio/mpeg;base64,${audioBase64}`
 
@@ -67,11 +104,20 @@ export async function POST(
     book.audioUrl = audioUrl
     setBook(params.bookId, book)
 
+    console.log(`Successfully generated audio for book ${params.bookId}, size: ${audioBuffer.byteLength} bytes`)
+
     return NextResponse.json({ audioUrl })
   } catch (error: any) {
-    console.error('Error generating audio:', error)
+    console.error('Error generating audio:', {
+      message: error.message,
+      stack: error.stack,
+      bookId: params.bookId,
+    })
     return NextResponse.json(
-      { error: error.message || 'Failed to generate audio' },
+      { 
+        error: error.message || 'Failed to generate audio',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     )
   }
