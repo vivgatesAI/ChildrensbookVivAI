@@ -77,7 +77,7 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${process.env.VENICE_API_KEY}`,
+          Authorization: `Bearer ${process.env.VENICE_API_KEY || 'lnWNeSg0pA_rQUooNpbfpPDBaj2vJnWol5WqKWrIEF'}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -190,6 +190,39 @@ async function generateBookImages(
     : ''
 
   try {
+    // Generate title page image first
+    const titlePagePrompt = `A beautiful children's book cover illustration for "${book.title}". ${illustrationStyle} style, children's book cover, colorful, whimsical, high quality, detailed, charming, inviting, magical, with space for title text overlay at the top`
+    
+    const titlePageResponse = await fetch(
+      'https://api.venice.ai/api/v1/image/generate',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.VENICE_API_KEY || 'lnWNeSg0pA_rQUooNpbfpPDBaj2vJnWol5WqKWrIEF'}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'qwen-image',
+          prompt: titlePagePrompt,
+          width: 1024,
+          height: 768,
+          format: 'webp',
+          steps: 8,
+        }),
+      }
+    )
+
+    if (titlePageResponse.ok) {
+      const titlePageData = await titlePageResponse.json()
+      const titlePageBase64 = titlePageData.images?.[0]
+      if (titlePageBase64) {
+        book.titlePage = {
+          image: `data:image/webp;base64,${titlePageBase64}`,
+          title: book.title,
+        }
+        setBook(bookId, book)
+      }
+    }
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
       // Build prompt with character consistency, keeping under 1600 characters
@@ -207,7 +240,7 @@ async function generateBookImages(
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${process.env.VENICE_API_KEY}`,
+            Authorization: `Bearer ${process.env.VENICE_API_KEY || 'lnWNeSg0pA_rQUooNpbfpPDBaj2vJnWol5WqKWrIEF'}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({

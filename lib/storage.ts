@@ -7,9 +7,15 @@ interface BookPage {
   image: string
 }
 
+interface TitlePage {
+  image: string
+  title: string
+}
+
 interface Book {
   id: string
   title: string
+  titlePage?: TitlePage
   pages: BookPage[]
   ageRange: string
   illustrationStyle: string
@@ -34,5 +40,5 @@ export function hasBook(bookId: string): boolean {
 }
 
 export { books }
-export type { Book, BookPage }
+export type { Book, BookPage, TitlePage }
 

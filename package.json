@@ -9,11 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/pdfkit": "^0.17.4",
+    "axios": "^1.7.0",
     "next": "^14.2.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
     "openai": "^4.47.0",
-    "axios": "^1.7.0"
+    "pdfkit": "^0.17.2",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
@@ -25,4 +27,3 @@
     "typescript": "^5.3.3"
   }
 }
-

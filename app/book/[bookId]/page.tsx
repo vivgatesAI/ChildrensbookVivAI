@@ -9,9 +9,15 @@ interface BookPage {
   image: string
 }
 
+interface TitlePage {
+  image: string
+  title: string
+}
+
 interface Book {
   id: string
   title: string
+  titlePage?: TitlePage
   pages: BookPage[]
   ageRange: string
   illustrationStyle: string
@@ -77,6 +83,16 @@ export default function BookViewerPage() {
       setCurrentPage(newPage)
       setIsPageTransitioning(false)
     }, 150)
+  }
+
+  const handleDownloadPDF = () => {
+    if (!book) return
+    window.open(`/api/download-pdf/${bookId}`, '_blank')
+  }
+
+  const handleDownloadAudio = () => {
+    if (!book || !book.audioUrl) return
+    window.open(`/api/download-audio/${bookId}`, '_blank')
   }
 
   const handleDownloadHTML = () => {
@@ -355,8 +371,119 @@ export default function BookViewerPage() {
     )
   }
 
-  const page = book.pages[currentPage]
-  const totalPages = book.pages.length
+  // Calculate total pages including title page
+  const hasTitlePage = !!book.titlePage
+  const totalPages = book.pages.length + (hasTitlePage ? 1 : 0)
+  const isTitlePage = hasTitlePage && currentPage === 0
+  const contentPageIndex = hasTitlePage ? currentPage - 1 : currentPage
+  const page = isTitlePage ? null : book.pages[contentPageIndex]
+
+  // Handle title page display
+  if (isTitlePage && book.titlePage) {
+    return (
+      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50 font-display dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-center justify-between bg-white/90 dark:bg-gray-900/90 p-4 shadow-sm backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push('/')}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 hover:bg-purple-200 dark:bg-purple-800 dark:hover:bg-purple-700 transition-colors"
+              title="Home"
+            >
+              <Icon name="home" className="text-purple-700 dark:text-purple-300" size={24} />
+            </button>
+            <button
+              onClick={() => router.back()}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+              title="Back"
+            >
+              <Icon name="arrow_back" className="text-gray-700 dark:text-gray-300" size={24} />
+            </button>
+          </div>
+          <div className="flex items-center gap-2 flex-1 justify-center">
+            <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate px-4">
+              {book.title}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadPDF}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white transition-all shadow-md hover:scale-110 active:scale-95"
+              title="Download PDF"
+            >
+              <Icon name="book" className="text-lg" size={24} />
+            </button>
+            {book.audioUrl && (
+              <button
+                onClick={handleDownloadAudio}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-all shadow-md hover:scale-110 active:scale-95"
+                title="Download Audio"
+              >
+                <Icon name="download" className="text-lg" size={24} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Title Page Content */}
+        <main className="flex flex-1 flex-col items-center justify-center px-4 py-6 max-w-4xl mx-auto w-full">
+          <div className={`w-full rounded-2xl overflow-hidden shadow-xl mb-6 bg-white dark:bg-gray-800 transition-all duration-500 ${
+            isPageTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+          }`}>
+            <div className="relative">
+              <img
+                src={book.titlePage.image}
+                alt="Book Cover"
+                className="w-full h-auto object-cover"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-2xl text-center px-8">
+                  {book.titlePage.title}
+                </h1>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Page Indicators */}
+        <div className="flex w-full flex-row items-center justify-center gap-2 py-4">
+          {Array.from({ length: totalPages }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handlePageChange(index)}
+              className={`h-2 rounded-full transition-all duration-300 hover:scale-125 ${
+                index === currentPage
+                  ? 'w-8 bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500 shadow-lg'
+                  : 'w-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+              }`}
+              aria-label={`Go to page ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="sticky bottom-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 shadow-lg">
+          <div className="flex flex-1 justify-between gap-4 px-4 py-4 max-w-4xl mx-auto">
+            <button
+              onClick={() => handlePageChange(0)}
+              disabled={true}
+              className="flex h-12 items-center justify-center gap-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 px-6 text-base font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+            >
+              <Icon name="chevron_left" size={24} />
+              <span>Previous</span>
+            </button>
+            <button
+              onClick={() => handlePageChange(1)}
+              className="flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 dark:from-blue-600 dark:hover:bg-blue-700 px-6 text-base font-semibold text-white transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+            >
+              <span>Next</span>
+              <Icon name="chevron_right" size={24} />
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (!page) {
     return (
@@ -400,13 +527,14 @@ export default function BookViewerPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={handleDownloadHTML}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 hover:bg-green-600 text-white transition-all shadow-md hover:scale-110 active:scale-95"
-            title="Download as HTML"
+            onClick={handleDownloadPDF}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white transition-all shadow-md hover:scale-110 active:scale-95"
+            title="Download PDF"
           >
-            <Icon name="download" className="text-lg" size={24} />
+              <Icon name="book" className="text-lg" size={24} />
           </button>
           {book.audioUrl ? (
+            <>
             <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 rounded-full px-3 py-2 border border-blue-200 dark:border-blue-800">
               <audio 
                 ref={setAudioRef}
@@ -417,6 +545,14 @@ export default function BookViewerPage() {
                 <source src={book.audioUrl} type="audio/mpeg" />
               </audio>
             </div>
+              <button
+                onClick={handleDownloadAudio}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-all shadow-md hover:scale-110 active:scale-95"
+                title="Download Audio"
+              >
+                <Icon name="download" className="text-lg" size={24} />
+              </button>
+            </>
           ) : (
             <button
               onClick={handleGenerateAudio}
@@ -466,7 +602,7 @@ export default function BookViewerPage() {
 
       {/* Page Indicators */}
       <div className="flex w-full flex-row items-center justify-center gap-2 py-4">
-        {book.pages.map((_, index) => (
+        {Array.from({ length: totalPages }).map((_, index) => (
           <button
             key={index}
             onClick={() => handlePageChange(index)}
