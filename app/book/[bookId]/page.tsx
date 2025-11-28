@@ -430,18 +430,11 @@ export default function BookViewerPage() {
           <div className={`w-full rounded-2xl overflow-hidden shadow-xl mb-6 bg-white dark:bg-gray-800 transition-all duration-500 ${
             isPageTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
           }`}>
-            <div className="relative">
-              <img
-                src={book.titlePage.image}
-                alt="Book Cover"
-                className="w-full h-auto object-cover"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-2xl text-center px-8">
-                  {book.titlePage.title}
-                </h1>
-              </div>
-            </div>
+            <img
+              src={book.titlePage.image}
+              alt="Book Cover"
+              className="w-full h-auto object-cover"
+            />
           </div>
         </main>
 

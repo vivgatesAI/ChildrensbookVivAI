@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getBook } from '@/lib/storage'
 import PDFDocument from 'pdfkit'
+import { Readable } from 'stream'
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +21,7 @@ export async function GET(
       )
     }
 
-    // Create a PDF document
+    // Create a PDF document - use standard configuration
     const doc = new PDFDocument({
       size: 'A4',
       margins: { top: 50, bottom: 50, left: 50, right: 50 },
@@ -73,24 +74,37 @@ export async function GET(
       const yAfterImage = addImageToPage(page.image, imageHeight)
       
       // Add text below image with beautiful formatting
-      // Use default font to avoid font file issues in production
-      doc.fontSize(16)
-        .fillColor('#2d2d2d')
-        .text(page.text, 50, yAfterImage, {
-          align: 'left',
+      // Avoid explicit font calls to prevent font file loading issues
+      try {
+        doc.fontSize(16)
+          .fillColor('#2d2d2d')
+          .text(page.text, 50, yAfterImage, {
+            align: 'left',
+            width: doc.page.width - 100,
+            lineGap: 6,
+            paragraphGap: 4,
+          })
+      } catch (fontError) {
+        // Fallback if font operations fail
+        console.warn('Font operation failed, using basic text:', fontError)
+        doc.text(page.text, 50, yAfterImage, {
           width: doc.page.width - 100,
-          lineGap: 6,
-          paragraphGap: 4,
         })
+      }
       
       // Add page number at bottom
-      doc.fontSize(10)
-        .fillColor('#999999')
-        .text(
-          `Page ${page.pageNumber}`,
-          50,
-          doc.page.height - 40
-        )
+      try {
+        doc.fontSize(10)
+          .fillColor('#999999')
+          .text(
+            `Page ${page.pageNumber}`,
+            50,
+            doc.page.height - 40
+          )
+      } catch (fontError) {
+        // Fallback if font operations fail
+        doc.text(`Page ${page.pageNumber}`, 50, doc.page.height - 40)
+      }
       
       if (i < book.pages.length - 1) {
         doc.addPage()
