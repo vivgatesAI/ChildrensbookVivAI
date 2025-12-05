@@ -39,11 +39,6 @@ export default function PDFViewPage() {
         const data = await response.json()
         setBook(data)
         setIsLoading(false)
-        
-        // Trigger print dialog after a short delay to ensure page is loaded
-        setTimeout(() => {
-          window.print()
-        }, 500)
       } catch (error) {
         console.error('Error fetching book:', error)
         setIsLoading(false)
@@ -144,12 +139,20 @@ export default function PDFViewPage() {
       </div>
       
       <div className="pdf-container">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <style jsx global>{`
         @media print {
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
           body {
             margin: 0;
             padding: 0;
             background: white;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           }
           
           .pdf-container {
@@ -168,6 +171,7 @@ export default function PDFViewPage() {
             display: flex;
             flex-direction: column;
             background: white;
+            position: relative;
           }
           
           .title-page {
@@ -178,12 +182,14 @@ export default function PDFViewPage() {
             height: 100vh;
             margin: 0;
             padding: 0;
+            background: white;
           }
           
           .title-page img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            display: block;
           }
           
           .content-page {
@@ -191,31 +197,39 @@ export default function PDFViewPage() {
             flex-direction: column;
             width: 100%;
             min-height: 100vh;
-            padding: 40px;
+            padding: 50px 60px;
             box-sizing: border-box;
+            background: white;
+            justify-content: space-between;
           }
           
           .page-image {
             width: 100%;
-            max-height: 60vh;
+            max-height: 65vh;
             object-fit: contain;
             margin-bottom: 30px;
+            display: block;
           }
           
           .page-text {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            font-size: 18px;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 20px;
+            font-weight: 400;
             line-height: 1.8;
-            color: #2d2d2d;
+            color: #1a1a1a;
             flex: 1;
             text-align: left;
+            padding: 0;
+            margin: 0;
           }
           
           .page-number {
             position: absolute;
-            bottom: 20px;
-            right: 40px;
-            font-size: 12px;
+            bottom: 30px;
+            right: 60px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
             color: #999;
           }
           
@@ -229,6 +243,7 @@ export default function PDFViewPage() {
           body {
             background: #f5f5f5;
             padding: 20px;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           }
           
           .pdf-container {
@@ -263,31 +278,34 @@ export default function PDFViewPage() {
           .content-page {
             display: flex;
             flex-direction: column;
-            padding: 40px;
+            padding: 50px 60px;
             min-height: 100vh;
             position: relative;
           }
           
           .page-image {
             width: 100%;
-            max-height: 60vh;
+            max-height: 65vh;
             object-fit: contain;
             margin-bottom: 30px;
           }
           
           .page-text {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            font-size: 18px;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 20px;
+            font-weight: 400;
             line-height: 1.8;
-            color: #2d2d2d;
+            color: #1a1a1a;
             flex: 1;
           }
           
           .page-number {
             position: absolute;
-            bottom: 20px;
-            right: 40px;
-            font-size: 12px;
+            bottom: 30px;
+            right: 60px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
             color: #999;
           }
         }

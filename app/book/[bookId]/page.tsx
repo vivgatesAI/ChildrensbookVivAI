@@ -89,8 +89,8 @@ export default function BookViewerPage() {
     if (!book) return
     
     try {
-      // Try to download PDF directly
-      const response = await fetch(`/api/generate-pdf/${bookId}`)
+      // Download PDF directly from server
+      const response = await fetch(`/api/download-pdf/${bookId}`)
       if (response.ok && response.headers.get('content-type')?.includes('application/pdf')) {
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
