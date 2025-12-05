@@ -5,6 +5,10 @@ import { Icon } from '@/components/Icons'
 
 export default function WelcomePage() {
   const router = useRouter()
+  
+  const handleViewGallery = () => {
+    router.push('/gallery')
+  }
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-gradient-to-br from-purple-600 via-pink-500 to-yellow-400 font-display">
@@ -37,7 +41,7 @@ export default function WelcomePage() {
             Create magical, personalized storybooks for your little ones.
           </p>
         </div>
-        <div className="flex w-full max-w-md flex-shrink-0 flex-col items-center justify-center">
+        <div className="flex w-full max-w-md flex-shrink-0 flex-col items-center justify-center gap-4">
           <button
             onClick={() => router.push('/generate')}
             className="w-full max-w-xs rounded-2xl bg-yellow-400 hover:bg-yellow-300 px-8 py-4 font-display text-lg font-bold text-purple-700 shadow-2xl transition-all hover:scale-105 hover:shadow-3xl active:scale-95 flex items-center justify-center gap-2"
@@ -46,7 +50,14 @@ export default function WelcomePage() {
             <span>Start Your Story</span>
             <Icon name="auto_stories" className="text-purple-700" size={24} />
           </button>
-          <p className="mt-4 cursor-pointer text-center font-display text-sm font-medium text-white/80 underline hover:text-white transition-colors">
+          <button
+            onClick={handleViewGallery}
+            className="w-full max-w-xs rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur-md px-8 py-4 font-display text-lg font-bold text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl active:scale-95 flex items-center justify-center gap-2 border-2 border-white/40"
+          >
+            <Icon name="menu_book" className="text-white" size={24} />
+            <span>Browse Gallery</span>
+          </button>
+          <p className="mt-2 cursor-pointer text-center font-display text-sm font-medium text-white/80 underline hover:text-white transition-colors">
             How does it work?
           </p>
         </div>

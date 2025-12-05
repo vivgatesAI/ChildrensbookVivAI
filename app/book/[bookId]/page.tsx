@@ -85,9 +85,31 @@ export default function BookViewerPage() {
     }, 150)
   }
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!book) return
-    window.open(`/api/download-pdf/${bookId}`, '_blank')
+    
+    try {
+      // Try to download PDF directly
+      const response = await fetch(`/api/generate-pdf/${bookId}`)
+      if (response.ok && response.headers.get('content-type')?.includes('application/pdf')) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${book.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+      } else {
+        // Fallback: open print page
+        window.open(`/pdf/${bookId}`, '_blank')
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      // Fallback: open print page
+      window.open(`/pdf/${bookId}`, '_blank')
+    }
   }
 
   const handleDownloadAudio = () => {
