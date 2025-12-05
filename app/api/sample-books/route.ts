@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
-import { getAllSampleBooks } from '@/lib/storage'
+import { getAllSampleBooks, ensureSampleBooksLoaded } from '@/lib/storage'
 
 export async function GET() {
   try {
+    // Explicitly ensure sample books are loaded
+    ensureSampleBooksLoaded()
     const sampleBooks = getAllSampleBooks()
     
     // Return books with minimal data for gallery display

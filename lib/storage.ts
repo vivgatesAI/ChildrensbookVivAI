@@ -57,16 +57,22 @@ function loadSampleBooks() {
 
 // Initialize sample books (server-side only)
 let sampleBooksLoaded = false
-if (typeof window === 'undefined' && !sampleBooksLoaded) {
-  try {
-    loadSampleBooks()
-    sampleBooksLoaded = true
-  } catch (error) {
-    // Silently fail if sample books can't be loaded
+
+// Ensure sample books are loaded (call this from API routes)
+export function ensureSampleBooksLoaded() {
+  if (typeof window === 'undefined' && !sampleBooksLoaded) {
+    try {
+      loadSampleBooks()
+      sampleBooksLoaded = true
+    } catch (error) {
+      console.error('Failed to load sample books:', error)
+    }
   }
 }
 
 export function getBook(bookId: string): Book | undefined {
+  // Ensure sample books are loaded when getting a book
+  ensureSampleBooksLoaded()
   return books.get(bookId)
 }
 
@@ -79,6 +85,8 @@ export function hasBook(bookId: string): boolean {
 }
 
 export function getAllSampleBooks(): Book[] {
+  // Ensure sample books are loaded before returning
+  ensureSampleBooksLoaded()
   return Array.from(books.values()).filter(book => book.isSample === true)
 }
 
