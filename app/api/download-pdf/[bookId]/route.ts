@@ -77,7 +77,7 @@ export async function GET(
     })
 
     // Wait a bit for fonts to load
-    await page.waitForTimeout(1000)
+    await new Promise(resolve => setTimeout(resolve, 1000))
 
     // Generate PDF with proper formatting for children's book
     const pdfBuffer = await page.pdf({
