@@ -102,16 +102,26 @@ Format the response as JSON with this structure:
 Remember: Each page's text should be 6-8 sentences of expert-quality children's book writing that captivates and delights young readers.`
 
     // Generate story text using Venice API directly
+    const apiKey = process.env.VENICE_API_KEY
+    if (!apiKey) {
+      console.error('VENICE_API_KEY environment variable is not set')
+      return NextResponse.json(
+        { error: 'Server configuration error: API key not configured' },
+        { status: 500 }
+      )
+    }
+
+    console.log('Generating story with Venice API...')
     const completionResponse = await fetch(
       'https://api.venice.ai/api/v1/chat/completions',
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${process.env.VENICE_API_KEY || 'lnWNeSg0pA_rQUooNpbfpPDBaj2vJnWol5WqKWrIEF'}`,
+          Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'venice-uncensored',
+          model: 'llama-3.3-70b',
           messages: [
             {
               role: 'system',
@@ -121,18 +131,16 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
             { role: 'user', content: storyPrompt },
           ],
           temperature: 0.9,
-          max_completion_tokens: 4000,
-          response_format: { type: 'json_object' },
-          venice_parameters: {
-            include_venice_system_prompt: false,
-          },
+          max_tokens: 4000,
         }),
       }
     )
 
     if (!completionResponse.ok) {
+      const errorText = await completionResponse.text()
+      console.error('Venice API error:', completionResponse.status, errorText)
       throw new Error(
-        `Venice API error: ${completionResponse.statusText}`
+        `Venice API error: ${completionResponse.status} - ${completionResponse.statusText}`
       )
     }
 
@@ -358,31 +366,43 @@ async function generateBookImages(
 
 // Helper for Venice API calls
 async function generateImage(prompt: string, model: string, width: number, height: number, steps: number) {
-  const response = await fetch(
-    'https://api.venice.ai/api/v1/image/generate',
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.VENICE_API_KEY || 'lnWNeSg0pA_rQUooNpbfpPDBaj2vJnWol5WqKWrIEF'}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        prompt,
-        width,
-        height,
-        format: 'webp',
-        steps,
-      }),
-    }
-  )
-
-  if (!response.ok) {
-    console.error(`Image generation failed: ${response.statusText}`)
+  const apiKey = process.env.VENICE_API_KEY
+  if (!apiKey) {
+    console.error('VENICE_API_KEY not set for image generation')
     return null
   }
 
-  const data = await response.json()
-  return data.images?.[0]
+  try {
+    const response = await fetch(
+      'https://api.venice.ai/api/v1/image/generate',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          prompt,
+          width,
+          height,
+          format: 'webp',
+          steps,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Image generation failed: ${response.status} - ${errorText}`)
+      return null
+    }
+
+    const data = await response.json()
+    return data.images?.[0]
+  } catch (error) {
+    console.error('Image generation error:', error)
+    return null
+  }
 }
 

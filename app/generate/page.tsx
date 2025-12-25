@@ -174,7 +174,7 @@ export default function GeneratePage() {
       <main className="flex grow flex-col items-center justify-start px-4 py-2 text-center max-w-2xl mx-auto w-full overflow-y-auto min-h-0">
         {isGenerating ? (
           <div className="flex-1 flex flex-col items-center justify-center w-full py-8">
-            <GeneratingGame />
+            <GeneratingGame progress={generationProgress} />
           </div>
         ) : (
           /* Form State */
