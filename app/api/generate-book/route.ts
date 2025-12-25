@@ -139,17 +139,25 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
     if (!completionResponse.ok) {
       const errorText = await completionResponse.text()
       console.error('Venice API error:', completionResponse.status, errorText)
-      throw new Error(
-        `Venice API error: ${completionResponse.status} - ${completionResponse.statusText}`
+      return NextResponse.json(
+        { error: `Story generation failed: ${completionResponse.statusText}` },
+        { status: 502 }
       )
     }
 
+    console.log('Venice API response received, parsing...')
     const completion = await completionResponse.json()
+    console.log('Venice API completion:', JSON.stringify(completion).substring(0, 500))
 
     const storyContent = completion.choices?.[0]?.message?.content
     if (!storyContent) {
-      throw new Error('No story content generated')
+      console.error('No story content in response:', completion)
+      return NextResponse.json(
+        { error: 'No story content generated' },
+        { status: 500 }
+      )
     }
+    console.log('Story content received, length:', storyContent.length)
 
     // Helper function to clean and repair JSON
     const cleanJSON = (jsonString: string): string => {
