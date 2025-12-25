@@ -64,7 +64,6 @@ export default function GeneratePage() {
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginMessage, setLoginMessage] = useState('')
 
-  // ... (getStyleInstruction)
 
   useEffect(() => {
     // ... (checkBookStatus)
@@ -139,7 +138,7 @@ export default function GeneratePage() {
         body: JSON.stringify({
           storyIdea,
           ageRange,
-          illustrationStyle: getStyleInstruction(illustrationStyle),
+          illustrationStyle,
         }),
       })
 
