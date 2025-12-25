@@ -82,9 +82,18 @@ export async function getBook(bookId: string): Promise<Book | undefined> {
     return sampleBooks.get(bookId)
   }
 
-  // Check Firestore
+  // Check in-memory books (for when Firebase is not configured)
+  if (inMemoryBooks.has(bookId)) {
+    return inMemoryBooks.get(bookId)
+  }
+
+  // Check Firestore (if configured)
   try {
     const db = getAdminDb()
+    if (!db) {
+      // Firebase not configured, only sample/in-memory books available
+      return undefined
+    }
     const doc = await db.collection('books').doc(bookId).get()
 
     if (doc.exists) {
@@ -97,6 +106,9 @@ export async function getBook(bookId: string): Promise<Book | undefined> {
   return undefined
 }
 
+// In-memory storage for books when Firestore is not configured
+const inMemoryBooks: Map<string, Book> = new Map()
+
 export async function setBook(bookId: string, book: Book): Promise<void> {
   // If it's a sample book, update in memory (shouldn't really happen for creating new books)
   if (book.isSample) {
@@ -106,6 +118,12 @@ export async function setBook(bookId: string, book: Book): Promise<void> {
 
   try {
     const db = getAdminDb()
+    if (!db) {
+      // Firebase not configured, store in memory (will be lost on restart)
+      inMemoryBooks.set(bookId, book)
+      console.log(`Stored book ${bookId} in memory (Firebase not configured)`)
+      return
+    }
     // Convert to plain object if needed, but Firestore handles JSON-like objects
     // Careful with undefined values, Firestore ignores them but it's good practice to clean
     const bookData = JSON.parse(JSON.stringify(book))
@@ -118,9 +136,13 @@ export async function setBook(bookId: string, book: Book): Promise<void> {
 
 export async function hasBook(bookId: string): Promise<boolean> {
   if (sampleBooks.has(bookId)) return true
+  if (inMemoryBooks.has(bookId)) return true
 
   try {
     const db = getAdminDb()
+    if (!db) {
+      return false
+    }
     const doc = await db.collection('books').doc(bookId).get()
     return doc.exists
   } catch (error) {
@@ -138,6 +160,10 @@ export function getAllSampleBooks(): Book[] {
 export async function getUserBooks(userId: string): Promise<Book[]> {
   try {
     const db = getAdminDb()
+    if (!db) {
+      // Firebase not configured, return in-memory books for this user
+      return Array.from(inMemoryBooks.values()).filter(book => book.ownerId === userId)
+    }
     const snapshot = await db.collection('books')
       .where('ownerId', '==', userId)
       .orderBy('createdAt', 'desc')
