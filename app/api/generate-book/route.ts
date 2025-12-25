@@ -22,8 +22,10 @@ export async function POST(request: NextRequest) {
       const token = authHeader.split('Bearer ')[1]
       try {
         const app = getAdminApp()
-        const decodedToken = await getAuth(app).verifyIdToken(token)
-        userId = decodedToken.uid
+        if (app) {
+          const decodedToken = await getAuth(app).verifyIdToken(token)
+          userId = decodedToken.uid
+        }
       } catch (e) {
         console.warn('Invalid auth token provided', e)
       }

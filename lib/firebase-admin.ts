@@ -14,9 +14,8 @@ export function getAdminApp() {
 
     // Only initialize if we have credentials
     if (!serviceAccount.projectId || !serviceAccount.clientEmail || !serviceAccount.privateKey) {
-        // In development or build time without keys, we might want to skip or throw
-        // For now, let's throw to make it obvious keys are missing
-        throw new Error('Missing Firebase Admin Credential Env Vars');
+        // Return null if credentials are missing - caller should handle this gracefully
+        return null;
     }
 
     return initializeApp({
@@ -26,5 +25,8 @@ export function getAdminApp() {
 
 export function getAdminDb() {
     const app = getAdminApp();
+    if (!app) {
+        return null;
+    }
     return getFirestore(app);
 }

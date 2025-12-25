@@ -5,6 +5,9 @@ import { AuthProvider } from '@/components/AuthContext'
 export const metadata: Metadata = {
   title: 'KinderQuill - Create Magical Storybooks',
   description: 'Create magical, personalized storybooks for your little ones.',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({

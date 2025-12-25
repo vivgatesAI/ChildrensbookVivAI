@@ -14,6 +14,14 @@ export async function GET(request: NextRequest) {
 
         const token = authHeader.split('Bearer ')[1]
         const app = getAdminApp()
+        
+        if (!app) {
+            return NextResponse.json(
+                { error: 'Authentication service not configured' },
+                { status: 503 }
+            )
+        }
+        
         const decodedToken = await getAuth(app).verifyIdToken(token)
         const userId = decodedToken.uid
 
