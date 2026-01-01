@@ -162,9 +162,21 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
     }
 
     if (!completionResponse || !completionResponse.ok) {
-      const errorMessage = completionResponse?.status === 429 
-        ? 'AI service is busy. Please try again in a few minutes.'
-        : 'Story generation failed. Please try again.'
+      let errorMessage = 'Story generation failed. Please try again.'
+      
+      if (completionResponse?.status === 429) {
+        errorMessage = 'AI service is busy. Please try again in a few minutes.'
+      } else if (lastError) {
+        // Try to parse the error message
+        try {
+          const errorData = JSON.parse(lastError)
+          errorMessage = errorData.error || errorData.message || errorMessage
+        } catch {
+          errorMessage = lastError.substring(0, 200) || errorMessage
+        }
+      }
+      
+      console.error('Final Venice API error:', completionResponse?.status, errorMessage)
       return NextResponse.json(
         { error: errorMessage },
         { status: completionResponse?.status === 429 ? 503 : 502 }
