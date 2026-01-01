@@ -148,10 +148,10 @@ export function GeneratingGame({ progress = 0 }: GeneratingGameProps) {
             <span>Progress</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner relative">
             <div 
               className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500 rounded-full transition-all duration-700 ease-out relative"
-              style={{ width: `${Math.max(progress, 3)}%` }}
+              style={{ width: `${Math.max(progress, 2)}%`, minWidth: progress > 0 ? '2px' : '0px' }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
             </div>

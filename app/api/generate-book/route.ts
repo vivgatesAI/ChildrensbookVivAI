@@ -113,56 +113,71 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
 
     console.log('Generating story with Venice API...')
     
-    // Retry logic for Venice API (handles 429 rate limits)
+    // Model fallback strategy: try gemini-3-flash-preview first, then mistral-31-24b
+    const models = ['gemini-3-flash-preview', 'mistral-31-24b']
     let completionResponse: Response | null = null
     let lastError = ''
+    let modelUsed = ''
     const maxRetries = 3
     
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      completionResponse = await fetch(
-        'https://api.venice.ai/api/v1/chat/completions',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'gemini-3-flash-preview',
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'You are an award-winning expert children\'s book author with decades of experience creating magical, engaging stories. You write at a professional publication-quality level. CRITICAL: You MUST respond with ONLY valid JSON. No markdown code blocks, no explanations, no additional text. Just pure, valid JSON that can be parsed directly.',
-              },
-              { role: 'user', content: storyPrompt },
-            ],
-            temperature: 0.9,
-            max_tokens: 4000,
-          }),
-        }
-      )
+    // Try each model in order
+    for (const model of models) {
+      console.log(`Attempting with model: ${model}`)
+      modelUsed = model
+      
+      // Retry logic for each model (handles 429 rate limits)
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        completionResponse = await fetch(
+          'https://api.venice.ai/api/v1/chat/completions',
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: model,
+              messages: [
+                {
+                  role: 'system',
+                  content:
+                    'You are an award-winning expert children\'s book author with decades of experience creating magical, engaging stories. You write at a professional publication-quality level. CRITICAL: You MUST respond with ONLY valid JSON. No markdown code blocks, no explanations, no additional text. Just pure, valid JSON that can be parsed directly.',
+                },
+                { role: 'user', content: storyPrompt },
+              ],
+              temperature: 0.9,
+              max_tokens: 4000,
+            }),
+          }
+        )
 
-      if (completionResponse.ok) {
-        break // Success!
+        if (completionResponse.ok) {
+          console.log(`Successfully used model: ${model}`)
+          break // Success with this model!
+        }
+        
+        // Check if it's a rate limit error (429)
+        if (completionResponse.status === 429 && attempt < maxRetries) {
+          const waitTime = attempt * 5000 // 5s, 10s, 15s
+          console.log(`Venice API rate limited with ${model} (attempt ${attempt}/${maxRetries}). Waiting ${waitTime/1000}s...`)
+          await new Promise(resolve => setTimeout(resolve, waitTime))
+          continue
+        }
+        
+        // For other errors, capture and try next model
+        lastError = await completionResponse.text()
+        console.error(`Venice API error with ${model}:`, completionResponse.status, lastError.substring(0, 200))
+        break // Break retry loop, try next model
       }
       
-      // Check if it's a rate limit error (429)
-      if (completionResponse.status === 429 && attempt < maxRetries) {
-        const waitTime = attempt * 5000 // 5s, 10s, 15s
-        console.log(`Venice API rate limited (attempt ${attempt}/${maxRetries}). Waiting ${waitTime/1000}s...`)
-        await new Promise(resolve => setTimeout(resolve, waitTime))
-        continue
+      // If we got a successful response, break out of model loop
+      if (completionResponse && completionResponse.ok) {
+        break
       }
-      
-      // For other errors, capture and break
-      lastError = await completionResponse.text()
-      console.error('Venice API error:', completionResponse.status, lastError)
-      break
     }
 
     if (!completionResponse || !completionResponse.ok) {
-      let errorMessage = 'Story generation failed. Please try again.'
+      let errorMessage = 'Story generation failed with all available models. Please try again.'
       
       if (completionResponse?.status === 429) {
         errorMessage = 'AI service is busy. Please try again in a few minutes.'
@@ -176,22 +191,35 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
         }
       }
       
-      console.error('Final Venice API error:', completionResponse?.status, errorMessage)
+      console.error(`Final Venice API error after trying models ${models.join(', ')}:`, completionResponse?.status, errorMessage)
       return NextResponse.json(
         { error: errorMessage },
         { status: completionResponse?.status === 429 ? 503 : 502 }
       )
     }
+    
+    console.log(`Successfully generated story using model: ${modelUsed}`)
 
     console.log('Venice API response received, parsing...')
-    const completion = await completionResponse.json()
-    console.log('Venice API completion:', JSON.stringify(completion).substring(0, 500))
+    let completion
+    try {
+      completion = await completionResponse.json()
+      console.log('Venice API completion:', JSON.stringify(completion).substring(0, 500))
+    } catch (parseError: any) {
+      console.error('Failed to parse Venice API response as JSON:', parseError)
+      const textResponse = await completionResponse.text()
+      console.error('Raw response:', textResponse.substring(0, 1000))
+      return NextResponse.json(
+        { error: 'Invalid response from AI service. Please try again.' },
+        { status: 502 }
+      )
+    }
 
     const storyContent = completion.choices?.[0]?.message?.content
     if (!storyContent) {
       console.error('No story content in response:', completion)
       return NextResponse.json(
-        { error: 'No story content generated' },
+        { error: 'No story content generated. Please try again.' },
         { status: 500 }
       )
     }
@@ -274,6 +302,7 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
       status: 'generating',
       createdAt: new Date().toISOString(),
       expectedPages: storyData.pages?.length || 8,
+      generationProgress: 10, // Story generation complete (10% of total)
       prompts: {
         story: storyPrompt,
         images: []
@@ -301,9 +330,16 @@ Remember: Each page's text should be 6-8 sentences of expert-quality children's 
 
     return NextResponse.json({ bookId, status: 'generating' })
   } catch (error: any) {
-    console.error('Error generating book:', error)
+    console.error('Error generating book:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
     return NextResponse.json(
-      { error: error.message || 'Failed to generate book' },
+      { 
+        error: error.message || 'Failed to generate book',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     )
   }
@@ -334,13 +370,20 @@ async function generateBookImages(
     // Collect all image prompts to save later
     const imagePrompts: Array<{ pageNumber: number | 'cover'; prompt: string }> = []
     
-    // Total steps: 1 for story (already done), 1 for cover, N for pages
-    const totalSteps = 1 + pages.length // cover + pages
-    let completedSteps = 0
+    // Total steps: 1 for story (already done = 10%), 1 for cover, N for pages
+    // Progress: 10% (story) + 10% (cover) + 80% (pages)
+    const totalPages = pages.length
+    const progressPerPage = 80 / totalPages // 80% divided by number of pages
+    const coverProgress = 10 // Cover is 10% of total
     
     // Helper to update progress
-    const updateProgress = async () => {
-      book.generationProgress = Math.round((completedSteps / totalSteps) * 100)
+    const updateProgress = async (step: 'cover' | 'page', pageIndex?: number) => {
+      if (step === 'cover') {
+        book.generationProgress = 10 + coverProgress // Story (10%) + Cover (10%) = 20%
+      } else if (step === 'page' && pageIndex !== undefined) {
+        // Story (10%) + Cover (10%) + Pages progress (0-80%)
+        book.generationProgress = Math.min(95, 20 + (pageIndex + 1) * progressPerPage)
+      }
       await setBook(bookId, book)
     }
 
@@ -356,8 +399,7 @@ async function generateBookImages(
         title: book.title,
       }
     }
-    completedSteps++
-    await updateProgress()
+    await updateProgress('cover')
 
     // 2. Generate Pages SEQUENTIALLY for accurate progress tracking
     book.pages = [] // Initialize empty array
@@ -385,8 +427,7 @@ async function generateBookImages(
         image: `data:image/webp;base64,${img}`,
       })
       
-      completedSteps++
-      await updateProgress()
+      await updateProgress('page', i)
     }
 
     // 3. Mark as completed

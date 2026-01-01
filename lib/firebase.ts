@@ -18,13 +18,21 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Initialize Analytics (client-side only)
+// Initialize Analytics (client-side only) - gracefully handle tracking prevention
 let analytics;
 if (typeof window !== 'undefined') {
   isSupported().then(supported => {
     if (supported) {
-      analytics = getAnalytics(app);
+      try {
+        analytics = getAnalytics(app);
+      } catch (error) {
+        // Silently fail if analytics is blocked (tracking prevention)
+        console.debug('Firebase Analytics initialization skipped (tracking prevention may be enabled)');
+      }
     }
+  }).catch(() => {
+    // Silently fail if analytics is not supported or blocked
+    console.debug('Firebase Analytics not supported or blocked');
   });
 }
 

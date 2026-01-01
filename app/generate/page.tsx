@@ -151,7 +151,8 @@ export default function GeneratePage() {
 
       const data = await response.json()
       setBookId(data.bookId)
-      setGenerationProgress(10)
+      // Story generation starts immediately, show initial progress
+      setGenerationProgress(5)
     } catch (error) {
       console.error('Error generating book:', error)
       alert('Failed to generate book. Please try again.')
