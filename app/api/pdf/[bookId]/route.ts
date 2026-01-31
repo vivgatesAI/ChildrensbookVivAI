@@ -44,7 +44,7 @@ export async function GET(
       await page.evaluateHandle('document.fonts.ready')
 
       // Generate PDF
-      const pdf = await page.pdf({
+      const pdfBuffer = await page.pdf({
         format: 'A4',
         printBackground: true,
         margin: {
@@ -54,6 +54,9 @@ export async function GET(
           left: '20px',
         },
       })
+
+      // Convert Buffer to Uint8Array for NextResponse
+      const pdf = new Uint8Array(pdfBuffer)
 
       // Return PDF
       return new NextResponse(pdf, {
