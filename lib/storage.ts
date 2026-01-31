@@ -1,6 +1,18 @@
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
 import { getAdminDb } from './firebase-admin'
+import { 
+  getBookFromSQLite, 
+  setBookInSQLite, 
+  getUserBooksFromSQLite,
+  deleteBookFromSQLite,
+  toggleFavoriteInSQLite,
+  getFavoritesFromSQLite,
+  recordReadingInSQLite,
+  getReadingStatsFromSQLite,
+  getParentSettingsFromSQLite,
+  setParentSettingsInSQLite,
+} from './sqlite-storage'
 
 interface BookPage {
   pageNumber: number
@@ -96,6 +108,14 @@ export async function getBook(bookId: string): Promise<Book | undefined> {
     return inMemoryBooks.get(bookId)
   }
 
+  // Try SQLite first (persistent local storage)
+  try {
+    const sqliteBook = await getBookFromSQLite(bookId)
+    if (sqliteBook) return sqliteBook
+  } catch (error) {
+    console.log('SQLite not available, trying Firestore...')
+  }
+
   // Check Firestore (if configured)
   try {
     const db = getAdminDb()
@@ -123,6 +143,15 @@ export async function setBook(bookId: string, book: Book): Promise<void> {
   if (book.isSample) {
     sampleBooks.set(bookId, book)
     return
+  }
+
+  // Try SQLite first (persistent local storage)
+  try {
+    await setBookInSQLite(book)
+    console.log(`Stored book ${bookId} in SQLite`)
+    return
+  } catch (error) {
+    console.log('SQLite storage failed, trying Firestore...')
   }
 
   try {
@@ -167,6 +196,14 @@ export function getAllSampleBooks(): Book[] {
 
 // New: Get books for a specific user
 export async function getUserBooks(userId: string): Promise<Book[]> {
+  // Try SQLite first
+  try {
+    const sqliteBooks = await getUserBooksFromSQLite(userId)
+    if (sqliteBooks.length > 0) return sqliteBooks
+  } catch (error) {
+    console.log('SQLite query failed, trying Firestore...')
+  }
+
   try {
     const db = getAdminDb()
     if (!db) {
@@ -182,6 +219,69 @@ export async function getUserBooks(userId: string): Promise<Book[]> {
   } catch (error) {
     console.error(`Error fetching books for user ${userId}:`, error)
     return []
+  }
+}
+
+// New: Library/Favorites functions
+export async function toggleFavorite(userId: string, bookId: string): Promise<boolean> {
+  try {
+    return await toggleFavoriteInSQLite(userId, bookId)
+  } catch (error) {
+    console.error('Error toggling favorite:', error)
+    return false
+  }
+}
+
+export async function getFavorites(userId: string): Promise<string[]> {
+  try {
+    return await getFavoritesFromSQLite(userId)
+  } catch (error) {
+    console.error('Error getting favorites:', error)
+    return []
+  }
+}
+
+export async function recordReading(userId: string, bookId: string, durationSeconds: number = 0, completed: boolean = true): Promise<void> {
+  try {
+    await recordReadingInSQLite(userId, bookId, durationSeconds, completed)
+  } catch (error) {
+    console.error('Error recording reading:', error)
+  }
+}
+
+export async function getReadingStats(userId: string) {
+  try {
+    return await getReadingStatsFromSQLite(userId)
+  } catch (error) {
+    console.error('Error getting reading stats:', error)
+    return {
+      totalBooksRead: 0,
+      totalReadingTime: 0,
+      favoriteBooks: [],
+      recentBooks: [],
+    }
+  }
+}
+
+export async function getParentSettings(userId: string) {
+  try {
+    return await getParentSettingsFromSQLite(userId)
+  } catch (error) {
+    console.error('Error getting parent settings:', error)
+    return undefined
+  }
+}
+
+export async function setParentSettings(userId: string, settings: {
+  contentFilterEnabled?: boolean
+  maxBooksPerDay?: number
+  allowSharing?: boolean
+  requireApproval?: boolean
+}) {
+  try {
+    await setParentSettingsInSQLite(userId, settings)
+  } catch (error) {
+    console.error('Error setting parent settings:', error)
   }
 }
 

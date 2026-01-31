@@ -2,163 +2,219 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Header } from '@/components/Header'
 import { Icon } from '@/components/Icons'
 import { useAuth } from '@/components/AuthContext'
-import type { Book } from '@/lib/storage'
-import { auth } from '@/lib/firebase'
+import { Header } from '@/components/Header'
+import { LoginModal } from '@/components/LoginModal'
+
+interface Book {
+  id: string
+  title: string
+  titlePage?: { image: string; title: string }
+  ageRange: string
+  illustrationStyle: string
+  status: 'generating' | 'completed' | 'error'
+  createdAt: string
+  isFavorite?: boolean
+}
 
 export default function LibraryPage() {
-    const router = useRouter()
-    const { user, loading } = useAuth()
-    const [books, setBooks] = useState<Book[]>([])
-    const [isLoadingBooks, setIsLoadingBooks] = useState(true)
+  const router = useRouter()
+  const { user, loading } = useAuth()
+  const [books, setBooks] = useState<Book[]>([])
+  const [favorites, setFavorites] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all')
+  const [isLoading, setIsLoading] = useState(true)
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
-    useEffect(() => {
-        if (!loading && !user) {
-            router.push('/')
-            return
-        }
-
-        if (user) {
-            fetchBooks()
-        }
-    }, [user, loading, router])
-
-    const fetchBooks = async () => {
-        try {
-            if (!auth.currentUser) return
-            const token = await auth.currentUser.getIdToken()
-
-            const response = await fetch('/api/my-books', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-
-            if (response.ok) {
-                const data = await response.json()
-                setBooks(data.books || [])
-            }
-        } catch (error) {
-            console.error('Error fetching books:', error)
-        } finally {
-            setIsLoadingBooks(false)
-        }
+  useEffect(() => {
+    if (!loading && !user) {
+      setShowLoginModal(true)
+      return
     }
 
-    const handleBookClick = (bookId: string) => {
-        router.push(`/book/${bookId}`)
+    if (user) {
+      fetchBooks()
     }
+  }, [user, loading])
 
-    if (loading || (!user && isLoadingBooks)) {
-        return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-                <Header title="My Library" />
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-4">
-                        <Icon name="sync" className="animate-spin text-purple-600" size={32} />
-                        <p className="text-gray-500">Loading library...</p>
-                    </div>
-                </div>
-            </div>
-        )
+  const fetchBooks = async () => {
+    try {
+      const token = await user?.getIdToken()
+      const response = await fetch('/api/library', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setBooks(data.books)
+        setFavorites(data.favorites)
+      }
+    } catch (error) {
+      console.error('Error fetching library:', error)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  const toggleFavorite = async (bookId: string) => {
+    try {
+      const token = await user?.getIdToken()
+      const response = await fetch(`/api/library/favorite/${bookId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (response.ok) {
+        const { isFavorite } = await response.json()
+        if (isFavorite) {
+          setFavorites([...favorites, bookId])
+        } else {
+          setFavorites(favorites.filter(id => id !== bookId))
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    }
+  }
+
+  const filteredBooks = activeTab === 'favorites' 
+    ? books.filter(book => favorites.includes(book.id))
+    : books
+
+  if (isLoading) {
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-            <Header title="My Library" />
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50 flex items-center justify-center">
+        <Icon name="auto_awesome" className="animate-spin text-purple-500" size={48} />
+      </div>
+    )
+  }
 
-            <main className="flex-1 container mx-auto px-4 py-8">
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 font-display">
-                        My Storybooks
-                    </h1>
-                    <button
-                        onClick={() => router.push('/generate')}
-                        className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition-colors font-semibold shadow-md"
-                    >
-                        <Icon name="auto_awesome" size={20} />
-                        <span className="hidden sm:inline">Create New Story</span>
-                        <span className="sm:hidden">New</span>
-                    </button>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
+      <Header title="My Library" />
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => router.push('/')} 
+        message="Sign in to view your library and save your favorite stories!"
+      />
+
+      <main className="max-w-6xl mx-auto px-4 py-6">
+        {/* Tabs */}
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+              activeTab === 'all'
+                ? 'bg-purple-500 text-white shadow-lg'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <Icon name="menu_book" className="inline mr-2" size={20} />
+            All Books ({books.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('favorites')}
+            className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+              activeTab === 'favorites'
+                ? 'bg-pink-500 text-white shadow-lg'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <Icon name="favorite" className="inline mr-2" size={20} />
+            Favorites ({favorites.length})
+          </button>
+        </div>
+
+        {/* Books Grid */}
+        {filteredBooks.length === 0 ? (
+          <div className="text-center py-12">
+            <Icon name="menu_book" className="mx-auto text-gray-300 mb-4" size={64} />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">
+              {activeTab === 'favorites' ? 'No favorites yet' : 'No books yet'}
+            </h3>
+            <p className="text-gray-500 mb-4">
+              {activeTab === 'favorites' 
+                ? 'Mark books as favorites to see them here!'
+                : 'Start creating your first magical story!'
+              }
+            </p>
+            <button
+              onClick={() => router.push('/generate')}
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+            >
+              Create a Story
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredBooks.map((book) => (
+              <div
+                key={book.id}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all group"
+              >
+                {/* Book Cover */}
+                <div 
+                  className="aspect-[4/3] bg-gray-100 relative cursor-pointer"
+                  onClick={() => router.push(`/book/${book.id}`)}
+                >
+                  {book.titlePage ? (
+                    <img
+                      src={book.titlePage.image}
+                      alt={book.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-200 to-pink-200">
+                      <Icon name="auto_stories" className="text-white/50" size={48} />
+                    </div>
+                  )}
+                  
+                  {/* Status Badge */}
+                  {book.status === 'generating' && (
+                    <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-400 text-yellow-800 text-xs font-semibold rounded-full">
+                      Creating...
+                    </div>
+                  )}
+
+                  {/* Favorite Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleFavorite(book.id)
+                    }}
+                    className="absolute top-2 left-2 w-10 h-10 rounded-full bg-white/80 hover:bg-white flex items-center justify-center transition-all shadow-md"
+                  >
+                    <Icon 
+                      name={favorites.includes(book.id) ? 'favorite' : 'favorite_border'} 
+                      className={favorites.includes(book.id) ? 'text-pink-500' : 'text-gray-400'}
+                      size={24}
+                    />
+                  </button>
                 </div>
 
-                {isLoadingBooks ? (
-                    <div className="flex justify-center py-20">
-                        <Icon name="sync" className="animate-spin text-purple-600" size={32} />
-                    </div>
-                ) : books.length === 0 ? (
-                    <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-                        <div className="w-20 h-20 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Icon name="menu_book" className="text-purple-400" size={40} />
-                        </div>
-                        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                            Your library is empty
-                        </h2>
-                        <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-                            You haven't created any stories yet. Start your journey by creating a magical storybook!
-                        </p>
-                        <button
-                            onClick={() => router.push('/generate')}
-                            className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-                        >
-                            <Icon name="auto_awesome" size={20} />
-                            Create Your First Book
-                        </button>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {books.map((book) => (
-                            <div
-                                key={book.id}
-                                onClick={() => handleBookClick(book.id)}
-                                className="group relative bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer border border-gray-100 dark:border-gray-700 flex flex-col h-full"
-                            >
-                                {/* Cover Image */}
-                                <div className="aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-700 relative">
-                                    {book.titlePage?.image ? (
-                                        <img
-                                            src={book.titlePage.image}
-                                            alt={book.title}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                    ) : book.pages?.[0]?.image ? (
-                                        <img
-                                            src={book.pages[0].image}
-                                            alt={book.title}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            <Icon name="image" size={48} />
-                                        </div>
-                                    )}
-
-                                    {/* Status Badge */}
-                                    {book.status !== 'completed' && (
-                                        <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-md shadow-sm flex items-center gap-1">
-                                            {book.status === 'generating' && <Icon name="sync" className="animate-spin" size={12} />}
-                                            <span className="capitalize">{book.status}</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Content */}
-                                <div className="p-4 flex-1 flex flex-col">
-                                    <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 line-clamp-2 mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                                        {book.title}
-                                    </h3>
-                                    <div className="mt-auto flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                        <span>{new Date(book.createdAt).toLocaleDateString()}</span>
-                                        <span>{book.pages?.length || 0} pages</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </main>
-        </div>
-    )
+                {/* Book Info */}
+                <div className="p-4">
+                  <h3 className="font-bold text-gray-800 mb-1 truncate">{book.title}</h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    {book.ageRange} grade • {new Date(book.createdAt).toLocaleDateString()}
+                  </p>
+                  <button
+                    onClick={() => router.push(`/book/${book.id}`)}
+                    className="w-full py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg font-medium transition-all"
+                  >
+                    {book.status === 'generating' ? 'Creating...' : 'Read Book'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  )
 }
